@@ -10,7 +10,7 @@ function getResult(data) {
 getResult(data);
 
 function TaskThree() {
-  return <div>Task3</div>;
+  return <div className='container'>Task3</div>;
 }
 
 export default TaskThree;
