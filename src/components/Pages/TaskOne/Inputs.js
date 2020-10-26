@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
 
+const convertMagnitudes = {
+  m: { cm: 100, m: 1, in: 1000 / 25.4, ft: 1000 / 304.8 },
+  cm: { cm: 1, m: 0.01, in: 10 / 25.4, ft: 10 / 304.8 },
+  in: { cm: 2.54, m: 0.0254, in: 1, ft: 1 / 12 },
+  ft: { cm: 2.54 * 12, m: 0.0254 * 12, in: 12, ft: 1 },
+};
+
 const options = [
   { value: 'm', name: 'Метры', metric_system: 'customary' },
   { value: 'cm', name: 'Сантиметры', metric_system: 'customary' },
@@ -8,95 +15,17 @@ const options = [
 ];
 
 function Inputs() {
-  const [valueToCurrency, setvalueToCurrency] = useState(0);
-  const [valueFromCurrency, setvalueFromCurrency] = useState(0);
-  const [fromCurrency, setFromCurrency] = useState('m');
-  const [toCurrency, setToCurrency] = useState('m');
-
-  const convertationToMillimeters = () => {
-    const fromCurrencyInfo = options.find(
-      (item) => item.value === fromCurrency
-    );
-    let valueInMillimeters;
-
-    if (fromCurrencyInfo.metric_system === 'customary') {
-      switch (fromCurrency) {
-        case 'm':
-          valueInMillimeters = valueFromCurrency * 100 * 10;
-          break;
-
-        case 'cm':
-          valueInMillimeters = valueFromCurrency * 10;
-          break;
-
-        default:
-          valueInMillimeters = valueFromCurrency;
-      }
-    }
-
-    if (fromCurrencyInfo.metric_system === 'imperial') {
-      switch (fromCurrency) {
-        case 'in':
-          valueInMillimeters = valueFromCurrency * 25.4;
-          break;
-
-        case 'ft':
-          valueInMillimeters = valueFromCurrency * 25.4 * 12;
-          break;
-
-        default:
-          valueInMillimeters = 0;
-      }
-    }
-
-    return valueInMillimeters;
-  };
-
-  const getConvertedValue = () => {
-    const toCurrencyInfo = options.find((item) => item.value === toCurrency);
-    const valueInMillimeters = convertationToMillimeters();
-    let convertedValue;
-
-    if (toCurrencyInfo.metric_system === 'customary') {
-      switch (toCurrency) {
-        case 'm':
-          convertedValue = valueInMillimeters / 1000;
-          break;
-
-        case 'cm':
-          convertedValue = valueInMillimeters / 10;
-          break;
-
-        default:
-          convertedValue = 0;
-      }
-    }
-
-    if (toCurrencyInfo.metric_system === 'imperial') {
-      switch (toCurrency) {
-        case 'in':
-          debugger;
-          convertedValue = valueInMillimeters / 25.4;
-          break;
-
-        case 'ft':
-          convertedValue = valueInMillimeters / (25.4 * 12);
-          break;
-
-        default:
-          convertedValue = 0;
-      }
-    }
-
-    setvalueToCurrency(Number(convertedValue.toFixed(2)));
-  };
+  const [valueToMagnitude, setValueToMagnitude] = useState(0);
+  const [valueFromMagnitude, setValueFromMagnitude] = useState(0);
+  const [fromMagnitude, setFromMagnitude] = useState('m');
+  const [toMagnitude, setToMagnitude] = useState('m');
 
   return (
     <div style={{ width: '50%', margin: '50px auto' }}>
       <div className='d-flex flex-row justify-content-between'>
         <select
-          value={fromCurrency}
-          onChange={(e) => setFromCurrency(e.target.value)}
+          value={fromMagnitude}
+          onChange={(e) => setFromMagnitude(e.target.value)}
         >
           {options.map((item) => (
             <option value={item.value} key={item.name}>
@@ -106,8 +35,8 @@ function Inputs() {
         </select>
         <div> {'>'} </div>
         <select
-          value={toCurrency}
-          onChange={(e) => setToCurrency(e.target.value)}
+          value={toMagnitude}
+          onChange={(e) => setToMagnitude(e.target.value)}
         >
           {options.map((item) => (
             <option value={item.value} key={item.name}>
@@ -120,16 +49,21 @@ function Inputs() {
       <div className='d-flex flex-row justify-content-between my-4'>
         <input
           type='number'
-          value={valueFromCurrency}
-          onChange={(e) => setvalueFromCurrency(e.target.value)}
+          value={valueFromMagnitude}
+          onChange={(e) => setValueFromMagnitude(e.target.value)}
         />
-        <div>{valueToCurrency}</div>
+        <div>{valueToMagnitude}</div>
       </div>
 
       <button
         className='btn btn-primary'
         style={{ display: 'block', margin: 'auto', borderRadius: '5px' }}
-        onClick={getConvertedValue}
+        onClick={() => {
+          const coefficient = convertMagnitudes[fromMagnitude][toMagnitude];
+          const value = Number((coefficient * valueFromMagnitude).toFixed(2));
+
+          setValueToMagnitude(value);
+        }}
       >
         Конверитровать
       </button>
