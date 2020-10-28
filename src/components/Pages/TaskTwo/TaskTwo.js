@@ -1,33 +1,39 @@
 import React from 'react';
-import { data } from './data';
+
+import data from './data';
+import { include, exclude } from './rules';
 
 const dataCopy = { ...data };
+const functions = { include, exclude }; // переданные функции(модули)
+const allConditions = dataCopy.condition;
 
-function filteredData() {
-  let info = dataCopy.data;
-  const condition = dataCopy.condition;
+function getfilterData() {
+  let passedConditionFunc;
+  let passedConditionObj;
 
-  if (condition.hasOwnProperty('include')) {
-    const props = Object.entries(condition['include'][0]);
-
-    info = info.filter((item) => {
-      const [key, value] = props[0];
-      return item[key] === value;
-    });
+  for (const func in functions) {
+    if (allConditions.hasOwnProperty(func)) {
+      passedConditionFunc = functions[func]; // выбираем какой переданный модуль нужно вызвать
+      passedConditionObj = allConditions[func][0]; // получаем критерий поиска
+    }
   }
 
-  if (condition.hasOwnProperty('sort_by')) {
-    const key = condition['sort_by'][0];
-    info.sort((a, b) => a[key].localeCompare(b[key]));
-  }
-
-  return info;
+  return passedConditionFunc(dataCopy.data, passedConditionObj); // получаем отфильтрованный список
 }
 
-const res = filteredData();
+const filtredArr = getfilterData();
+
+const getSortedArr = (arr) => {
+  const key = allConditions['sort_by'][0];
+  return arr.sort((a, b) => a[key].localeCompare(b[key]));
+};
+
+const sortedArr = getSortedArr(filtredArr); //сортируем отфилтрованный список
+
+console.log(sortedArr);
 
 function TaskTwo() {
-  return <div className='container'>{JSON.stringify(res)}</div>;
+  return <div className='container'>Result in console</div>;
 }
 
 export default TaskTwo;
